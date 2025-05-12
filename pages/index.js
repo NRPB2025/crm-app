@@ -24,13 +24,23 @@ export default function Auth() {
   };
 
   const handleSignUp = async () => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    setMessage(error ? error.message : 'Registro exitoso. Verifica tu email.');
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      setMessage(error ? error.message : 'Registro exitoso. Verifica tu email.');
+    } catch (err) {
+      console.error(err);
+      setMessage('Error al registrarse.');
+    }
   };
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setMessage(error ? error.message : 'Inicio de sesión exitoso.');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setMessage(error ? error.message : 'Inicio de sesión exitoso.');
+    } catch (err) {
+      console.error(err);
+      setMessage('Error al iniciar sesión.');
+    }
   };
 
   const handleFileUpload = (e) => {
@@ -53,42 +63,62 @@ export default function Auth() {
         fetchContacts();
       } catch (err) {
         console.error(err);
+        setMessage('Error al importar contactos.');
       }
     };
     reader.readAsArrayBuffer(file);
   };
 
   return (
-    <div>
-      <h1>CRM App</h1>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>Login</button>
-      <button onClick={handleSignUp}>Sign Up</button>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">CRM App - Estilo Pipedrive</h2>
 
-      <hr />
+        <div className="space-y-4 mb-6">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-      <input type="file" onChange={handleFileUpload} />
-      <button onClick={handleImport}>Importar Contactos</button>
+        <div className="flex justify-between mb-6">
+          <button onClick={handleLogin} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg">Login</button>
+          <button onClick={handleSignUp} className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg">Sign Up</button>
+        </div>
 
-      {message && <p>{message}</p>}
+        <hr className="mb-6" />
 
-      <h2>Contactos</h2>
-      <ul>
-        {contacts.map((contact) => (
-          <li key={contact.id}>{contact.nombre} - {contact.email}</li>
-        ))}
-      </ul>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Importar Contactos</h3>
+          <input type="file" onChange={handleFileUpload} className="w-full p-2 border border-gray-300 rounded-lg mb-2" />
+          <button onClick={handleImport} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg w-full">Importar</button>
+        </div>
+
+        {message && <p className="text-red-500 mb-6">{message}</p>}
+
+        <h3 className="text-lg font-semibold mb-2">Contactos</h3>
+        <div className="bg-gray-100 p-4 rounded-lg">
+          {contacts.length > 0 ? (
+            contacts.map((contact, index) => (
+              <div key={index} className="flex justify-between items-center py-2 border-b border-gray-300">
+                <span>{contact.nombre} - {contact.email}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No hay contactos disponibles.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
